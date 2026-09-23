@@ -1,306 +1,795 @@
 from flask import Flask, render_template_string, jsonify
-from datetime import datetime
+from datetime import datetime, timezone
 import os
 
-# Specify your actual GitHub repository URL here
+# ============================================================
+# CONFIGURATION
+# ============================================================
+
 GITHUB_REPO_URL = "https://github.com/your-username/your-repo-name"
 
 application = Flask(__name__)
 
-# Rainbow-themed HTML template
+
+# ============================================================
+# PROFESSIONAL CLOUD DASHBOARD
+# ============================================================
+
 HTML_TEMPLATE = """
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Rainbow Cloud | AWS Elastic Beanstalk</title>
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>AURA Cloud Platform</title>
 
     <style>
+
+        /* =====================================================
+           GLOBAL
+        ===================================================== */
+
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
         }
 
         body {
+
+            font-family:
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                Roboto,
+                Helvetica,
+                Arial,
+                sans-serif;
+
             min-height: 100vh;
-            font-family: Arial, Helvetica, sans-serif;
+
+            color: #172033;
 
             background:
                 linear-gradient(
                     135deg,
-                    #ff0000,
-                    #ff7f00,
-                    #ffff00,
-                    #00ff00,
-                    #00bfff,
-                    #0000ff,
-                    #8b00ff
+                    #f8fbff 0%,
+                    #eef5ff 45%,
+                    #f8f3ff 100%
+                );
+        }
+
+
+        /* =====================================================
+           TOP RAINBOW ACCENT
+           ===================================================== */
+
+        .rainbow-line {
+
+            position: fixed;
+
+            top: 0;
+            left: 0;
+
+            width: 100%;
+            height: 4px;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    #ff4b4b,
+                    #ff9f43,
+                    #feca57,
+                    #1dd1a1,
+                    #48dbfb,
+                    #5f27cd,
+                    #ff6b81
                 );
 
-            background-size: 400% 400%;
-            animation: rainbowBackground 12s ease infinite;
-
-            color: #ffffff;
-            display: flex;
-            flex-direction: column;
+            z-index: 100;
         }
 
-        @keyframes rainbowBackground {
-            0% {
-                background-position: 0% 50%;
-            }
 
-            50% {
-                background-position: 100% 50%;
-            }
+        /* =====================================================
+           PAGE CONTAINER
+           ===================================================== */
 
-            100% {
-                background-position: 0% 50%;
-            }
+        .container {
+
+            width: min(1180px, 92%);
+
+            margin: auto;
         }
 
-        .overlay {
-            min-height: 100vh;
-            background: rgba(0, 0, 0, 0.20);
-            padding: 25px;
-        }
+
+        /* =====================================================
+           NAVBAR
+           ===================================================== */
 
         header {
-            max-width: 1200px;
-            margin: auto;
-            padding: 20px 25px;
 
-            background: rgba(255, 255, 255, 0.18);
-            backdrop-filter: blur(12px);
+            padding: 28px 0;
 
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            border-radius: 18px;
+            border-bottom:
+                1px solid rgba(30, 50, 80, 0.08);
+        }
+
+
+        .navbar {
 
             display: flex;
-            justify-content: space-between;
+
             align-items: center;
 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-weight: bold;
-            letter-spacing: 2px;
-        }
-
-        .rainbow-dot {
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-
-            background: linear-gradient(
-                135deg,
-                red,
-                orange,
-                yellow,
-                green,
-                blue,
-                purple
-            );
-
-            box-shadow: 0 0 15px rgba(255,255,255,0.8);
-        }
-
-        .region {
-            background: rgba(255,255,255,0.2);
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 13px;
-        }
-
-        main {
-            max-width: 1200px;
-            width: 100%;
-            margin: auto;
-            padding: 40px 0;
-
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 25px;
-        }
-
-        .card {
-            background: rgba(255,255,255,0.18);
-            backdrop-filter: blur(15px);
-
-            border: 1px solid rgba(255,255,255,0.4);
-            border-radius: 25px;
-
-            padding: 35px;
-
-            box-shadow:
-                0 15px 40px rgba(0,0,0,0.18);
-
-            transition: transform 0.3s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-        }
-
-        .main-card {
-            min-height: 500px;
-            display: flex;
-            flex-direction: column;
             justify-content: space-between;
         }
 
-        h1 {
-            font-size: clamp(40px, 6vw, 75px);
-            font-weight: 900;
-            line-height: 1;
-            margin-bottom: 20px;
 
-            text-shadow: 3px 3px 10px rgba(0,0,0,0.2);
+        .brand {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 13px;
         }
 
-        .success {
-            display: inline-block;
 
-            background: rgba(0, 200, 80, 0.85);
-            padding: 10px 20px;
+        .brand-icon {
 
-            border-radius: 30px;
-            font-size: 18px;
-            font-weight: bold;
-
-            margin-bottom: 25px;
-        }
-
-        .message {
-            font-size: 20px;
-            line-height: 1.7;
-        }
-
-        .environment {
-            margin-top: 20px;
-
-            background: rgba(0,0,0,0.18);
-            padding: 15px;
+            width: 40px;
+            height: 40px;
 
             border-radius: 12px;
 
-            font-family: monospace;
-        }
+            display: flex;
 
-        .terminal {
-            background: rgba(0,0,0,0.45);
+            align-items: center;
+            justify-content: center;
 
-            padding: 20px;
-            border-radius: 15px;
-
-            font-family: monospace;
-            font-size: 14px;
-
-            line-height: 1.8;
-        }
-
-        .terminal .ok {
-            color: #7cff9b;
-            font-weight: bold;
-        }
-
-        .stats-title {
-            font-size: 22px;
-            font-weight: bold;
-            margin-bottom: 25px;
-        }
-
-        .stat {
-            background: rgba(255,255,255,0.16);
-
-            padding: 18px;
-            border-radius: 15px;
-
-            margin-bottom: 15px;
-        }
-
-        .stat-label {
-            font-size: 12px;
-            opacity: 0.75;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .stat-value {
             font-size: 20px;
-            font-weight: bold;
-            margin-top: 6px;
+
+            color: white;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #5b5ce2,
+                    #8b5cf6
+                );
+
+            box-shadow:
+                0 8px 20px rgba(91,92,226,0.25);
         }
 
-        .health {
-            color: #7cff9b;
+
+        .brand-name {
+
+            font-size: 18px;
+
+            font-weight: 700;
+
+            letter-spacing: -0.3px;
         }
 
-        .button {
-            display: block;
 
-            text-align: center;
-            text-decoration: none;
+        .brand-subtitle {
 
-            padding: 15px;
-            margin-top: 15px;
+            font-size: 11px;
+
+            color: #7a8499;
+
+            margin-top: 2px;
+
+            letter-spacing: 0.5px;
+        }
+
+
+        .region {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 8px;
+
+            padding: 9px 15px;
 
             border-radius: 30px;
 
-            background: rgba(255,255,255,0.25);
-            color: white;
-
-            border: 1px solid rgba(255,255,255,0.5);
-
-            font-weight: bold;
-
-            transition: all 0.3s ease;
-        }
-
-        .button:hover {
             background: white;
-            color: #7b2cff;
-            transform: scale(1.03);
+
+            border:
+                1px solid rgba(30,50,80,0.08);
+
+            box-shadow:
+                0 5px 20px rgba(40,60,100,0.05);
+
+            font-size: 12px;
+
+            color: #536078;
         }
 
-        footer {
-            max-width: 1200px;
-            width: 100%;
-            margin: auto;
+
+        .status-dot {
+
+            width: 8px;
+            height: 8px;
+
+            border-radius: 50%;
+
+            background: #16c784;
+
+            box-shadow:
+                0 0 0 4px rgba(22,199,132,0.12);
+        }
+
+
+        /* =====================================================
+           HERO
+           ===================================================== */
+
+        .hero {
+
+            padding: 65px 0 45px;
 
             text-align: center;
-            padding: 20px;
-
-            font-size: 13px;
-            opacity: 0.85;
         }
 
-        @media (max-width: 800px) {
-            main {
+
+        .eyebrow {
+
+            display: inline-flex;
+
+            align-items: center;
+
+            gap: 8px;
+
+            padding: 7px 14px;
+
+            border-radius: 30px;
+
+            background: rgba(91,92,226,0.08);
+
+            color: #5557c8;
+
+            font-size: 12px;
+
+            font-weight: 700;
+
+            letter-spacing: 1px;
+
+            text-transform: uppercase;
+
+            margin-bottom: 22px;
+        }
+
+
+        .hero h1 {
+
+            font-size:
+                clamp(42px, 6vw, 72px);
+
+            line-height: 1.05;
+
+            letter-spacing: -3px;
+
+            font-weight: 800;
+
+            color: #141a2a;
+
+            margin-bottom: 20px;
+        }
+
+
+        .gradient-text {
+
+            background:
+                linear-gradient(
+                    90deg,
+                    #5557d9,
+                    #8b5cf6,
+                    #d946ef
+                );
+
+            -webkit-background-clip: text;
+
+            -webkit-text-fill-color: transparent;
+        }
+
+
+        .hero-description {
+
+            max-width: 650px;
+
+            margin: auto;
+
+            font-size: 17px;
+
+            line-height: 1.7;
+
+            color: #667085;
+        }
+
+
+        /* =====================================================
+           DASHBOARD
+           ===================================================== */
+
+        .dashboard {
+
+            display: grid;
+
+            grid-template-columns:
+                1.5fr
+                1fr;
+
+            gap: 22px;
+
+            margin-bottom: 40px;
+        }
+
+
+        .card {
+
+            background:
+                rgba(255,255,255,0.86);
+
+            border:
+                1px solid rgba(30,50,80,0.07);
+
+            border-radius: 22px;
+
+            padding: 30px;
+
+            box-shadow:
+                0 15px 45px rgba(40,60,100,0.08);
+
+            backdrop-filter: blur(10px);
+        }
+
+
+        .card-header {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            margin-bottom: 28px;
+        }
+
+
+        .card-title {
+
+            font-size: 14px;
+
+            font-weight: 700;
+
+            color: #30394d;
+
+            text-transform: uppercase;
+
+            letter-spacing: 0.8px;
+        }
+
+
+        .badge {
+
+            padding: 6px 11px;
+
+            border-radius: 20px;
+
+            font-size: 11px;
+
+            font-weight: 700;
+        }
+
+
+        .badge-success {
+
+            color: #087443;
+
+            background:
+                rgba(22,199,132,0.10);
+        }
+
+
+        /* =====================================================
+           DEPLOYMENT STATUS
+           ===================================================== */
+
+        .deployment {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 20px;
+
+            margin-bottom: 28px;
+        }
+
+
+        .success-icon {
+
+            width: 58px;
+            height: 58px;
+
+            flex-shrink: 0;
+
+            border-radius: 18px;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            font-size: 27px;
+
+            color: #079455;
+
+            background:
+                rgba(22,199,132,0.10);
+        }
+
+
+        .deployment h2 {
+
+            font-size: 28px;
+
+            letter-spacing: -0.8px;
+
+            color: #151b2c;
+        }
+
+
+        .deployment p {
+
+            margin-top: 5px;
+
+            font-size: 14px;
+
+            color: #7a8499;
+        }
+
+
+        /* =====================================================
+           ENVIRONMENT
+           ===================================================== */
+
+        .environment {
+
+            padding: 18px;
+
+            border-radius: 14px;
+
+            background: #f7f8fc;
+
+            border:
+                1px solid #edf0f6;
+
+            margin-bottom: 22px;
+        }
+
+
+        .environment-label {
+
+            font-size: 10px;
+
+            text-transform: uppercase;
+
+            color: #8b95a7;
+
+            letter-spacing: 1px;
+
+            margin-bottom: 7px;
+        }
+
+
+        .environment-value {
+
+            font-size: 15px;
+
+            font-weight: 600;
+
+            color: #30394d;
+        }
+
+
+        /* =====================================================
+           PIPELINE
+           ===================================================== */
+
+        .pipeline {
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            padding-top: 10px;
+        }
+
+
+        .pipeline-step {
+
+            text-align: center;
+
+            flex: 1;
+
+            position: relative;
+        }
+
+
+        .pipeline-step:not(:last-child)::after {
+
+            content: "";
+
+            position: absolute;
+
+            top: 14px;
+
+            left: 65%;
+
+            width: 70%;
+
+            height: 2px;
+
+            background: #dfe4ec;
+        }
+
+
+        .pipeline-dot {
+
+            position: relative;
+
+            z-index: 2;
+
+            margin: auto;
+
+            width: 28px;
+            height: 28px;
+
+            border-radius: 50%;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            background: #16c784;
+
+            color: white;
+
+            font-size: 12px;
+        }
+
+
+        .pipeline-label {
+
+            font-size: 10px;
+
+            color: #7a8499;
+
+            margin-top: 8px;
+        }
+
+
+        /* =====================================================
+           SYSTEM STATS
+           ===================================================== */
+
+        .stats {
+
+            display: grid;
+
+            grid-template-columns:
+                1fr 1fr;
+
+            gap: 12px;
+        }
+
+
+        .stat {
+
+            padding: 18px;
+
+            border-radius: 15px;
+
+            background: #f8f9fc;
+
+            border:
+                1px solid #edf0f5;
+        }
+
+
+        .stat-label {
+
+            font-size: 10px;
+
+            text-transform: uppercase;
+
+            color: #8993a5;
+
+            letter-spacing: 0.8px;
+
+            margin-bottom: 8px;
+        }
+
+
+        .stat-value {
+
+            font-size: 15px;
+
+            font-weight: 700;
+
+            color: #30394d;
+        }
+
+
+        .stat-value.green {
+
+            color: #079455;
+        }
+
+
+        /* =====================================================
+           BUTTONS
+           ===================================================== */
+
+        .actions {
+
+            margin-top: 22px;
+        }
+
+
+        .button {
+
+            display: block;
+
+            width: 100%;
+
+            padding: 13px 18px;
+
+            margin-top: 10px;
+
+            text-align: center;
+
+            text-decoration: none;
+
+            border-radius: 12px;
+
+            font-size: 13px;
+
+            font-weight: 700;
+
+            transition: all 0.2s ease;
+        }
+
+
+        .button-primary {
+
+            color: white;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #5557d9,
+                    #7c3aed
+                );
+
+            box-shadow:
+                0 8px 20px rgba(91,92,226,0.20);
+        }
+
+
+        .button-secondary {
+
+            color: #505a70;
+
+            background: white;
+
+            border:
+                1px solid #e2e6ed;
+        }
+
+
+        .button:hover {
+
+            transform: translateY(-2px);
+
+            box-shadow:
+                0 10px 25px rgba(40,60,100,0.12);
+        }
+
+
+        /* =====================================================
+           FOOTER
+           ===================================================== */
+
+        footer {
+
+            padding: 30px 0 35px;
+
+            border-top:
+                1px solid rgba(30,50,80,0.08);
+
+            color: #8993a5;
+
+            font-size: 12px;
+
+            text-align: center;
+        }
+
+
+        .footer-brand {
+
+            font-weight: 700;
+
+            color: #5c6475;
+        }
+
+
+        /* =====================================================
+           RESPONSIVE
+           ===================================================== */
+
+        @media (max-width: 850px) {
+
+            .dashboard {
+
                 grid-template-columns: 1fr;
             }
 
-            header {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
+            .hero {
+
+                padding-top: 45px;
             }
 
-            .main-card {
-                min-height: auto;
+            .hero h1 {
+
+                letter-spacing: -2px;
             }
+
         }
+
+
+        @media (max-width: 550px) {
+
+            .navbar {
+
+                flex-direction: column;
+
+                gap: 15px;
+            }
+
+            .stats {
+
+                grid-template-columns: 1fr;
+            }
+
+            .pipeline-label {
+
+                font-size: 9px;
+            }
+
+        }
+
     </style>
 
+
     <script>
+
         function updateClock() {
+
             const now = new Date();
 
             document.getElementById("server-time").textContent =
@@ -312,194 +801,400 @@ HTML_TEMPLATE = """
         setInterval(updateClock, 1000);
 
         window.onload = updateClock;
+
     </script>
 
 </head>
 
+
 <body>
 
-<div class="overlay">
+    <div class="rainbow-line"></div>
 
-    <!-- HEADER -->
+
+    <!-- ======================================================
+         HEADER
+         ====================================================== -->
+
     <header>
 
-        <div class="logo">
-            <div class="rainbow-dot"></div>
-            <span>AURA CLOUD</span>
-        </div>
+        <div class="container">
 
-        <div class="region">
-            AWS REGION: {{ aws_region }}
+            <div class="navbar">
+
+                <div class="brand">
+
+                    <div class="brand-icon">
+                        ☁
+                    </div>
+
+                    <div>
+
+                        <div class="brand-name">
+                            AURA Cloud Platform
+                        </div>
+
+                        <div class="brand-subtitle">
+                            APPLICATION OPERATIONS
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="region">
+
+                    <span class="status-dot"></span>
+
+                    AWS REGION:
+                    {{ aws_region }}
+
+                </div>
+
+            </div>
+
         </div>
 
     </header>
 
 
-    <!-- MAIN -->
-    <main>
+    <!-- ======================================================
+         HERO
+         ====================================================== -->
 
-        <!-- LEFT CARD -->
-        <div class="card main-card">
+    <section class="hero">
 
-            <div>
+        <div class="container">
 
-                <div class="success">
-                    ✓ DEPLOYMENT SUCCESS
-                </div>
-
-                <h1>
-                    RAINBOW<br>
-                    CLOUD
-                </h1>
-
-                <div class="message">
-
-                    <p>
-                        🌈 Your Flask application is running successfully!
-                    </p>
-
-                    <p style="margin-top: 15px;">
-                        AWS Elastic Beanstalk has successfully
-                        initialized the Python/Gunicorn runtime.
-                    </p>
-
-                </div>
-
-                <div class="environment">
-                    ENVIRONMENT: {{ env_name }}
-                </div>
-
+            <div class="eyebrow">
+                ● Production Environment
             </div>
 
 
-            <!-- TERMINAL -->
+            <h1>
 
-            <div class="terminal">
+                Deployment
+                <span class="gradient-text">
+                    Successful
+                </span>
 
-                <div>> INITIALIZING EB DEPLOYMENT... <span class="ok">[OK]</span></div>
+            </h1>
 
-                <div>> VERIFYING REQUIREMENTS.TXT... <span class="ok">[OK]</span></div>
 
-                <div>> STARTING GUNICORN... <span class="ok">[OK]</span></div>
+            <p class="hero-description">
 
-                <div>> APPLICATION HEALTH CHECK... <span class="ok">[OK]</span></div>
+                Your application has been successfully deployed
+                and is currently running on AWS Elastic Beanstalk.
 
-                <div class="ok">
-                    > > > SYSTEM READY 🌈
-                </div>
+                All core application services are operational.
 
-            </div>
+            </p>
 
         </div>
 
+    </section>
 
-        <!-- RIGHT CARD -->
 
-        <div class="card">
+    <!-- ======================================================
+         DASHBOARD
+         ====================================================== -->
 
-            <div class="stats-title">
-                ☁ SYSTEM STATUS
+    <main class="container">
+
+        <div class="dashboard">
+
+
+            <!-- LEFT CARD -->
+
+            <div class="card">
+
+                <div class="card-header">
+
+                    <div class="card-title">
+                        Deployment Overview
+                    </div>
+
+                    <div class="badge badge-success">
+                        OPERATIONAL
+                    </div>
+
+                </div>
+
+
+                <div class="deployment">
+
+                    <div class="success-icon">
+                        ✓
+                    </div>
+
+                    <div>
+
+                        <h2>
+                            Application Online
+                        </h2>
+
+                        <p>
+                            Flask / Gunicorn runtime initialized successfully
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="environment">
+
+                    <div class="environment-label">
+                        Environment
+                    </div>
+
+                    <div class="environment-value">
+                        {{ env_name }}
+                    </div>
+
+                </div>
+
+
+                <!-- PIPELINE -->
+
+                <div class="pipeline">
+
+                    <div class="pipeline-step">
+
+                        <div class="pipeline-dot">
+                            ✓
+                        </div>
+
+                        <div class="pipeline-label">
+                            SOURCE
+                        </div>
+
+                    </div>
+
+
+                    <div class="pipeline-step">
+
+                        <div class="pipeline-dot">
+                            ✓
+                        </div>
+
+                        <div class="pipeline-label">
+                            BUILD
+                        </div>
+
+                    </div>
+
+
+                    <div class="pipeline-step">
+
+                        <div class="pipeline-dot">
+                            ✓
+                        </div>
+
+                        <div class="pipeline-label">
+                            DEPLOY
+                        </div>
+
+                    </div>
+
+
+                    <div class="pipeline-step">
+
+                        <div class="pipeline-dot">
+                            ✓
+                        </div>
+
+                        <div class="pipeline-label">
+                            HEALTH
+                        </div>
+
+                    </div>
+
+                </div>
+
             </div>
 
 
-            <div class="stat">
+            <!-- RIGHT CARD -->
 
-                <div class="stat-label">
-                    Server Time UTC
+            <div class="card">
+
+                <div class="card-header">
+
+                    <div class="card-title">
+                        System Status
+                    </div>
+
+                    <div class="badge badge-success">
+                        HEALTHY
+                    </div>
+
                 </div>
 
-                <div
-                    id="server-time"
-                    class="stat-value">
-                    {{ current_time }}
+
+                <div class="stats">
+
+
+                    <div class="stat">
+
+                        <div class="stat-label">
+                            Environment
+                        </div>
+
+                        <div class="stat-value">
+                            AWS EB
+                        </div>
+
+                    </div>
+
+
+                    <div class="stat">
+
+                        <div class="stat-label">
+                            Runtime
+                        </div>
+
+                        <div class="stat-value">
+                            Python
+                        </div>
+
+                    </div>
+
+
+                    <div class="stat">
+
+                        <div class="stat-label">
+                            Framework
+                        </div>
+
+                        <div class="stat-value">
+                            Flask
+                        </div>
+
+                    </div>
+
+
+                    <div class="stat">
+
+                        <div class="stat-label">
+                            Application
+                        </div>
+
+                        <div class="stat-value green">
+                            ● ONLINE
+                        </div>
+
+                    </div>
+
+
+                    <div class="stat">
+
+                        <div class="stat-label">
+                            Server Time
+                        </div>
+
+                        <div
+                            id="server-time"
+                            class="stat-value">
+
+                            {{ current_time }}
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="stat">
+
+                        <div class="stat-label">
+                            Region
+                        </div>
+
+                        <div class="stat-value">
+                            {{ aws_region }}
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="actions">
+
+                    <a
+                        href="/health"
+                        class="button button-primary">
+
+                        Run Health Check
+
+                    </a>
+
+
+                    <a
+                        href="{{ github_url }}"
+                        target="_blank"
+                        class="button button-secondary">
+
+                        View Source Repository
+
+                    </a>
+
                 </div>
 
             </div>
-
-
-            <div class="stat">
-
-                <div class="stat-label">
-                    Environment Health
-                </div>
-
-                <div class="stat-value health">
-                    ● NOMINAL
-                </div>
-
-            </div>
-
-
-            <div class="stat">
-
-                <div class="stat-label">
-                    Platform
-                </div>
-
-                <div class="stat-value">
-                    Flask + Gunicorn
-                </div>
-
-            </div>
-
-
-            <div class="stat">
-
-                <div class="stat-label">
-                    Cloud Platform
-                </div>
-
-                <div class="stat-value">
-                    AWS Elastic Beanstalk
-                </div>
-
-            </div>
-
-
-            <a href="/health" class="button">
-                🔍 RUN HEALTH CHECK
-            </a>
-
-
-            <a
-                href="{{ github_url }}"
-                target="_blank"
-                class="button">
-
-                💻 SOURCE CODE
-
-            </a>
 
         </div>
 
     </main>
 
 
-    <!-- FOOTER -->
+    <!-- ======================================================
+         FOOTER
+         ====================================================== -->
 
     <footer>
 
-        🌈 AURA CLOUD SYSTEM
-        &nbsp; • &nbsp;
-        AWS Elastic Beanstalk
-        &nbsp; • &nbsp;
-        Flask
+        <div class="container">
+
+            <span class="footer-brand">
+                AURA Cloud Platform
+            </span>
+
+            &nbsp; · &nbsp;
+
+            AWS Elastic Beanstalk
+
+            &nbsp; · &nbsp;
+
+            Flask
+
+            &nbsp; · &nbsp;
+
+            Gunicorn
+
+        </div>
 
     </footer>
 
-</div>
 
 </body>
+
 </html>
 """
 
 
+# ============================================================
+# HOME
+# ============================================================
+
 @application.route('/')
 def home():
 
-    now = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+    now = datetime.now(timezone.utc).strftime(
+        '%Y-%m-%d %H:%M:%S'
+    )
 
-    # Get environment name from AWS metadata if available
     env_name = os.environ.get(
         'AWS_EB_ENVIRONMENT_NAME',
         'LOCAL_DEBUG'
@@ -507,10 +1202,11 @@ def home():
 
     aws_region = os.environ.get(
         'AWS_REGION',
-        'us-east-1'
+        'eu-north-1'
     )
 
     return render_template_string(
+
         HTML_TEMPLATE,
 
         current_time=now,
@@ -520,8 +1216,13 @@ def home():
         env_name=env_name,
 
         aws_region=aws_region
+
     )
 
+
+# ============================================================
+# HEALTH CHECK
+# ============================================================
 
 @application.route('/health')
 def health_check():
@@ -533,16 +1234,21 @@ def health_check():
         "service_id": "aura-core-1",
 
         "timestamp_utc":
-            datetime.utcnow().isoformat()
+            datetime.now(timezone.utc).isoformat()
 
     }), 200
 
 
+# ============================================================
+# LOCAL DEVELOPMENT
+# ============================================================
+
 if __name__ == '__main__':
 
-    # Local development server execution
-
     application.run(
+
         host='0.0.0.0',
+
         port=5000
+
     )
