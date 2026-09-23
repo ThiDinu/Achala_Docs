@@ -3,172 +3,546 @@ from datetime import datetime
 import os
 
 # Specify your actual GitHub repository URL here
-GITHUB_REPO_URL = "https://github.com/your-username/your-repo-name" 
+GITHUB_REPO_URL = "https://github.com/your-username/your-repo-name"
 
 application = Flask(__name__)
 
-# HTML template styled with Tailwind CSS (Cyber-Tech Theme)
+# Rainbow-themed HTML template
 HTML_TEMPLATE = """
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project: AURA | AWS Elastic Beanstalk</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        // Simulate a running server clock
-        function updateClock() {
-            const now = new Date();
-            document.getElementById('server-time').textContent = now.toISOString().replace('T', ' ').substr(0, 19) + ' UTC';
-        }
-        setInterval(updateClock, 1000);
-    </script>
+
+    <title>Rainbow Cloud | AWS Elastic Beanstalk</title>
+
     <style>
-        /* Custom font and scanline effect */
-        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
-        body {
-            font-family: 'Share+Tech+Mono', monospace;
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
-        .scanlines::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: repeating-linear-gradient(
-                to bottom,
-                transparent,
-                transparent 2px,
-                rgba(0, 0, 0, 0.15) 3px,
-                transparent 3px
+
+        body {
+            min-height: 100vh;
+            font-family: Arial, Helvetica, sans-serif;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #ff0000,
+                    #ff7f00,
+                    #ffff00,
+                    #00ff00,
+                    #00bfff,
+                    #0000ff,
+                    #8b00ff
+                );
+
+            background-size: 400% 400%;
+            animation: rainbowBackground 12s ease infinite;
+
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @keyframes rainbowBackground {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .overlay {
+            min-height: 100vh;
+            background: rgba(0, 0, 0, 0.20);
+            padding: 25px;
+        }
+
+        header {
+            max-width: 1200px;
+            margin: auto;
+            padding: 20px 25px;
+
+            background: rgba(255, 255, 255, 0.18);
+            backdrop-filter: blur(12px);
+
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 18px;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        .rainbow-dot {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+
+            background: linear-gradient(
+                135deg,
+                red,
+                orange,
+                yellow,
+                green,
+                blue,
+                purple
             );
-            pointer-events: none;
-            z-index: 10;
+
+            box-shadow: 0 0 15px rgba(255,255,255,0.8);
+        }
+
+        .region {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 13px;
+        }
+
+        main {
+            max-width: 1200px;
+            width: 100%;
+            margin: auto;
+            padding: 40px 0;
+
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 25px;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.18);
+            backdrop-filter: blur(15px);
+
+            border: 1px solid rgba(255,255,255,0.4);
+            border-radius: 25px;
+
+            padding: 35px;
+
+            box-shadow:
+                0 15px 40px rgba(0,0,0,0.18);
+
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .main-card {
+            min-height: 500px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        h1 {
+            font-size: clamp(40px, 6vw, 75px);
+            font-weight: 900;
+            line-height: 1;
+            margin-bottom: 20px;
+
+            text-shadow: 3px 3px 10px rgba(0,0,0,0.2);
+        }
+
+        .success {
+            display: inline-block;
+
+            background: rgba(0, 200, 80, 0.85);
+            padding: 10px 20px;
+
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: bold;
+
+            margin-bottom: 25px;
+        }
+
+        .message {
+            font-size: 20px;
+            line-height: 1.7;
+        }
+
+        .environment {
+            margin-top: 20px;
+
+            background: rgba(0,0,0,0.18);
+            padding: 15px;
+
+            border-radius: 12px;
+
+            font-family: monospace;
+        }
+
+        .terminal {
+            background: rgba(0,0,0,0.45);
+
+            padding: 20px;
+            border-radius: 15px;
+
+            font-family: monospace;
+            font-size: 14px;
+
+            line-height: 1.8;
+        }
+
+        .terminal .ok {
+            color: #7cff9b;
+            font-weight: bold;
+        }
+
+        .stats-title {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 25px;
+        }
+
+        .stat {
+            background: rgba(255,255,255,0.16);
+
+            padding: 18px;
+            border-radius: 15px;
+
+            margin-bottom: 15px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.75;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 6px;
+        }
+
+        .health {
+            color: #7cff9b;
+        }
+
+        .button {
+            display: block;
+
+            text-align: center;
+            text-decoration: none;
+
+            padding: 15px;
+            margin-top: 15px;
+
+            border-radius: 30px;
+
+            background: rgba(255,255,255,0.25);
+            color: white;
+
+            border: 1px solid rgba(255,255,255,0.5);
+
+            font-weight: bold;
+
+            transition: all 0.3s ease;
+        }
+
+        .button:hover {
+            background: white;
+            color: #7b2cff;
+            transform: scale(1.03);
+        }
+
+        footer {
+            max-width: 1200px;
+            width: 100%;
+            margin: auto;
+
+            text-align: center;
+            padding: 20px;
+
+            font-size: 13px;
+            opacity: 0.85;
+        }
+
+        @media (max-width: 800px) {
+            main {
+                grid-template-columns: 1fr;
+            }
+
+            header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .main-card {
+                min-height: auto;
+            }
         }
     </style>
-</head>
-<body class="bg-black text-cyan-400 min-h-screen flex flex-col justify-between scanlines overflow-hidden">
-    
-    <!-- Background grid effect -->
-    <div class="fixed inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/dark-dotted-squares.png')]"></div>
 
-    <!-- Header / Navbar -->
-    <header class="relative z-20 w-full py-4 px-6 border-b border-cyan-950 flex justify-between items-center max-w-7xl mx-auto bg-black/50 backdrop-blur-sm">
-        <div class="flex items-center space-x-3">
-            <div class="relative h-3 w-3 flex items-center justify-center">
-                <div class="absolute h-full w-full bg-cyan-500 rounded-full animate-ping opacity-75"></div>
-                <div class="relative h-2 w-2 bg-cyan-300 rounded-full"></div>
-            </div>
-            <span class="font-bold text-sm tracking-widest uppercase text-cyan-300">SYS_ID: AURA_CORE_1</span>
+    <script>
+        function updateClock() {
+            const now = new Date();
+
+            document.getElementById("server-time").textContent =
+                now.toISOString()
+                   .replace("T", " ")
+                   .substring(0, 19) + " UTC";
+        }
+
+        setInterval(updateClock, 1000);
+
+        window.onload = updateClock;
+    </script>
+
+</head>
+
+<body>
+
+<div class="overlay">
+
+    <!-- HEADER -->
+    <header>
+
+        <div class="logo">
+            <div class="rainbow-dot"></div>
+            <span>AURA CLOUD</span>
         </div>
-        <div class="text-xs px-3 py-1 rounded border border-cyan-900 bg-cyan-950/50 text-cyan-500">
-            AWS_REGION: {{ aws_region }}
+
+        <div class="region">
+            AWS REGION: {{ aws_region }}
         </div>
+
     </header>
 
-    <!-- Main Content Grid -->
-    <main class="flex-grow flex items-center justify-center px-6 py-8 relative z-20">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 w-full max-w-7xl h-auto md:h-[70vh]">
-            
-            <!-- Left Panel: Status -->
-            <div class="md:col-span-3 bg-black border border-cyan-900 p-8 rounded-lg shadow-inner flex flex-col justify-between">
-                <div class="space-y-4">
-                    <div class="flex items-center justify-between border-b border-cyan-900 pb-2 mb-4">
-                        <h1 class="text-4xl md:text-6xl font-extrabold text-white tracking-tight uppercase">DEPLOYMENT_</h1>
-                        <span class="text-5xl font-black text-green-400">SUCCESS</span>
-                    </div>
 
-                    <div class="text-cyan-600 text-lg leading-relaxed max-w-3xl">
-                        <p class="animate-pulse">/// STATUS: CORE NODE OPERATIONAL. DEPLOYMENT PIPELINE [GITHUB_ACTIONS] VALIDATED.</p>
-                        <p class="mt-2">AWS Elastic Beanstalk successfully initialized with Python/Gunicorn runtime.</p>
-                        <p class="mt-2 text-white">ENVIRONMENT: {{ env_name }}</p>
-                    </div>
+    <!-- MAIN -->
+    <main>
+
+        <!-- LEFT CARD -->
+        <div class="card main-card">
+
+            <div>
+
+                <div class="success">
+                    ✓ DEPLOYMENT SUCCESS
                 </div>
 
-                <!-- Data Terminal -->
-                <div class="bg-gray-950 p-5 rounded font-mono text-xs mt-8 border border-gray-800 text-cyan-300 space-y-2 overflow-auto h-32">
-                    <p>> INITIALIZING EB DEPLOYMENT... [OK]</p>
-                    <p>> VERIFYING REQUIREMENTS.TXT... [OK]</p>
-                    <p>> STARTING GUNICORN... [OK]</p>
-                    <p>> APPLICATION HEALTH CHECK: ACTIVE... [OK]</p>
-                    <p class="text-green-400">> > > SYSTEM READY.</p>
+                <h1>
+                    RAINBOW<br>
+                    CLOUD
+                </h1>
+
+                <div class="message">
+
+                    <p>
+                        🌈 Your Flask application is running successfully!
+                    </p>
+
+                    <p style="margin-top: 15px;">
+                        AWS Elastic Beanstalk has successfully
+                        initialized the Python/Gunicorn runtime.
+                    </p>
+
                 </div>
+
+                <div class="environment">
+                    ENVIRONMENT: {{ env_name }}
+                </div>
+
             </div>
 
-            <!-- Right Panel: System Info & Links -->
-            <div class="bg-black border border-cyan-900 p-6 rounded-lg shadow-inner space-y-6 flex flex-col justify-between">
-                
-                <div>
-                    <h2 class="text-xl font-bold text-cyan-200 uppercase border-b border-cyan-900 pb-2 mb-4">SYSTEM_STATS</h2>
-                    
-                    <div class="space-y-4">
-                        <div class="bg-cyan-950 p-4 rounded border border-cyan-900">
-                            <p class="text-xs text-cyan-600 uppercase tracking-wider">SERVER_TIME_UTC</p>
-                            <p id="server-time" class="text-lg text-white font-bold mt-1 font-mono">{{ current_time }}</p>
-                        </div>
 
-                        <div class="bg-cyan-950 p-4 rounded border border-cyan-900">
-                            <p class="text-xs text-cyan-600 uppercase tracking-wider">ENV_HEALTH</p>
-                            <p class="text-green-400 font-bold mt-1 text-lg flex items-center space-x-2">
-                                <span class="relative flex h-3 w-3">
-                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                                    <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
-                                </span>
-                                <span>NOMINAL</span>
-                            </p>
-                        </div>
-                    </div>
+            <!-- TERMINAL -->
+
+            <div class="terminal">
+
+                <div>> INITIALIZING EB DEPLOYMENT... <span class="ok">[OK]</span></div>
+
+                <div>> VERIFYING REQUIREMENTS.TXT... <span class="ok">[OK]</span></div>
+
+                <div>> STARTING GUNICORN... <span class="ok">[OK]</span></div>
+
+                <div>> APPLICATION HEALTH CHECK... <span class="ok">[OK]</span></div>
+
+                <div class="ok">
+                    > > > SYSTEM READY 🌈
                 </div>
 
-                <!-- Link Section -->
-                <div class="space-y-3 pt-6 border-t border-cyan-900">
-                    <a href="/health" class="block w-full text-center px-6 py-3 rounded bg-cyan-900 hover:bg-cyan-800 text-white font-bold text-sm transition uppercase tracking-wider shadow-lg shadow-cyan-900/20">
-                        RUN HEALTH CHECK
-                    </a>
-                    <a href="{{ github_url }}" target="_blank" class="block w-full text-center px-6 py-3 rounded bg-gray-900 hover:bg-gray-800 text-cyan-300 font-bold text-sm border border-gray-700 transition uppercase tracking-wider flex items-center justify-center space-x-2">
-                        <svg height="20" width="20" class="fill-current" viewBox="0 0 16 16" version="1.1" aria-hidden="true"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"></path></svg>
-                        <span>SOURCE_CODE_REPO</span>
-                    </a>
-                </div>
             </div>
 
         </div>
+
+
+        <!-- RIGHT CARD -->
+
+        <div class="card">
+
+            <div class="stats-title">
+                ☁ SYSTEM STATUS
+            </div>
+
+
+            <div class="stat">
+
+                <div class="stat-label">
+                    Server Time UTC
+                </div>
+
+                <div
+                    id="server-time"
+                    class="stat-value">
+                    {{ current_time }}
+                </div>
+
+            </div>
+
+
+            <div class="stat">
+
+                <div class="stat-label">
+                    Environment Health
+                </div>
+
+                <div class="stat-value health">
+                    ● NOMINAL
+                </div>
+
+            </div>
+
+
+            <div class="stat">
+
+                <div class="stat-label">
+                    Platform
+                </div>
+
+                <div class="stat-value">
+                    Flask + Gunicorn
+                </div>
+
+            </div>
+
+
+            <div class="stat">
+
+                <div class="stat-label">
+                    Cloud Platform
+                </div>
+
+                <div class="stat-value">
+                    AWS Elastic Beanstalk
+                </div>
+
+            </div>
+
+
+            <a href="/health" class="button">
+                🔍 RUN HEALTH CHECK
+            </a>
+
+
+            <a
+                href="{{ github_url }}"
+                target="_blank"
+                class="button">
+
+                💻 SOURCE CODE
+
+            </a>
+
+        </div>
+
     </main>
 
-    <!-- Footer -->
-    <footer class="relative z-20 py-4 text-center text-xs text-cyan-900 border-t border-cyan-950 max-w-7xl mx-auto w-full bg-black/50">
-        [AURA_SYSTEM_RUNNING] >> AWS Elastic Beanstalk >> Flask v3.x
+
+    <!-- FOOTER -->
+
+    <footer>
+
+        🌈 AURA CLOUD SYSTEM
+        &nbsp; • &nbsp;
+        AWS Elastic Beanstalk
+        &nbsp; • &nbsp;
+        Flask
+
     </footer>
+
+</div>
 
 </body>
 </html>
 """
 
+
 @application.route('/')
 def home():
+
     now = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
-    # Get environment name from AWS metadata if available, else default
-    env_name = os.environ.get('AWS_EB_ENVIRONMENT_NAME', 'LOCAL_DEBUG')
-    aws_region = os.environ.get('AWS_REGION', 'us-east-1')
-    
+
+    # Get environment name from AWS metadata if available
+    env_name = os.environ.get(
+        'AWS_EB_ENVIRONMENT_NAME',
+        'LOCAL_DEBUG'
+    )
+
+    aws_region = os.environ.get(
+        'AWS_REGION',
+        'us-east-1'
+    )
+
     return render_template_string(
-        HTML_TEMPLATE, 
+        HTML_TEMPLATE,
+
         current_time=now,
+
         github_url=GITHUB_REPO_URL,
+
         env_name=env_name,
+
         aws_region=aws_region
     )
 
+
 @application.route('/health')
 def health_check():
+
     return jsonify({
+
         "status": "nominal",
+
         "service_id": "aura-core-1",
-        "timestamp_utc": datetime.utcnow().isoformat()
+
+        "timestamp_utc":
+            datetime.utcnow().isoformat()
+
     }), 200
 
+
 if __name__ == '__main__':
+
     # Local development server execution
-    application.run(host='0.0.0.0', port=5000)
+
+    application.run(
+        host='0.0.0.0',
+        port=5000
+    )
